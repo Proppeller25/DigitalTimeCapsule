@@ -13,19 +13,19 @@ const UserSchema = new mongoose.Schema({
     unique: true
   },
   password: {
-  type: String,
-  required: function () {
-    return !this.googleId
-  },
-  select: false
+    type: String,
+    required: function () {
+      return !this.googleId
+    },
+    select: false
   },
   lockCode: {
-    type: Number
+    type: String
   },
   role: {
     type: String,
-    enum: ['organizer', 'attendee', 'admin'],
-    default: 'attendee',
+    enum: ['user', 'admin'],
+    default: 'user',
   },
   verified: {
     type: Boolean,
@@ -46,7 +46,7 @@ const UserSchema = new mongoose.Schema({
   }
 },
 {
-    timestamps: true, // adds createdAt and updatedAt
+    timestamps: true
   }
 )
 

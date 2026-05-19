@@ -21,7 +21,7 @@ const capsuleSchema = new mongoose.Schema(
       required: true,
     },
     unlockCode: {
-      type: Number,
+      type: String,
       required: true,
     },
     visibility: {
