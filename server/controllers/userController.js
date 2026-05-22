@@ -2,6 +2,7 @@ const User = require('../models/user')
 const PairedUsers = require('../models/pairedUsers')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+const Capsule = require('../models/capsule')
 
 const createToken = (user) => {
   if (!process.env.JWT_SECRET) {
@@ -14,7 +15,7 @@ const createToken = (user) => {
   )
 }
 
-const isProduction = process.env.ENVIRONMENT && process.env.ENVIRONMENT === 'production'
+const isProduction = () => process.env.NODE_ENV === 'production'
 
 const signUp = async (req, res) => {
   try {
@@ -79,18 +80,20 @@ const login = async (req, res) => {
       return res.status(401).json({success: false, message: "Invalid password credentials"})
 
     const token = createToken(existingUser)
+    const tokenExpiryMs = 1000 * 60 * 60
 
     res.cookie('Authorization', token, {
       httpOnly: true,
-      secure: isProduction,
-      sameSite: isProduction ? 'strict' : 'lax',
+      secure: isProduction(),
+      sameSite: isProduction() ? 'strict' : 'lax',
       signed: true,
-      expires: new Date(Date.now() + 9000000)
+      expires: new Date(Date.now() + tokenExpiryMs)
     })
 
     return res.status(200).json({
       success: true,
-      message: "Logged in successfully"
+      message: "Logged in successfully",
+      token: !isProduction() ? token  : ""
     })
   } catch (error) {
     return res.status(500).json({
@@ -122,4 +125,169 @@ const loggedInUser = async (req, res) => {
   }
 }
 
-module.exports = {signUp, login, loggedInUser}
+const logout = (req, res) => {
+  try {
+    res.clearCookie('Authorization')
+    return res.status(200).json({
+      success: true,
+      message: "Logged out successfully"
+    })
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Server error"
+    })
+  }
+}
+
+const requestPair = async (req, res) => {
+  try {
+    const {
+      recipient,
+      allowBacklogSharing
+    } = req.body
+
+    if(!recipient) 
+      return res.status(400).json({success: false, message: "Missing required credentials"})
+
+
+    const requester = req.user.id?.toString() || req.user._id?.toString()
+
+    if(!requester) 
+      return res.status(401).json({success: false, message: "Missing required credentials"})
+
+    if(recipient?.toString() === requester) 
+      return res.status(409).json({success: false, message: "You cannot send a pair request to yourself"})
+    
+    const receiver = await User.findById(recipient)
+
+    if(!receiver) 
+      return res.status(404).json({success: false, message: "Recipient does not exist"})
+    
+    const shareSettings = { allowBacklogSharing }
+
+    await PairedUsers.create({
+      requester,
+      recipient,
+      shareSettings
+    })
+
+    
+    return res.status(200).json({
+      success: true,
+      message: `Share request sent to ${receiver?.username}`
+    })
+
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Server error"
+    })
+  }
+}
+
+const confirmPair = async (req, res) => {
+  try {
+    const {decision} = req.body
+    const {pairId} = req.params
+
+    const recipient = req.user.id?.toString() || req.user._id?.toString()
+
+    if(!recipient || !decision || !pairId) 
+      return res.status(400).json({success: false, message: "Missing required parameters"})
+
+    const validDecisions = ['accepted', 'declined', 'cancelled', 'blocked']
+    if(!validDecisions.includes(decision))
+      return res.status(400).json({success: false, message: "Invalid decision value"})
+
+    const pair = await PairedUsers.findById(pairId)
+
+    if(!pair) 
+      return res.status(404).json({success: false, message: "Pair request not found"})
+
+    if(pair.recipient.toString() !== recipient) 
+      return res.status(403).json({success: false, message: "Forbidden"})
+
+    if (decision !== 'accepted') {
+      try {
+        pair.status = decision
+        await pair.save()
+        return res.status(200).json({success: true, message: `This pair request status is now ${decision}`})
+      } catch (error) {
+        return res.status(500).json({
+          success: false,
+          message: error.message || "Server error"
+        })
+      }
+    }
+
+    
+
+    const sharedCapsules = []
+
+    const requester = pair.requester
+
+    const requesterCapsules = (await Capsule.find({owner: requester, arrivalDate:pair.shareSettings.allowBacklogSharing ? {$lte: new Date()} : {$gt: new Date()}})).map(capsule => ({
+      capsule: capsule._id,
+      owner: requester,
+      sharedAt: Date.now()
+    }))
+
+    const recipientCapsules = (await Capsule.find({owner: recipient, arrivalDate:pair.shareSettings.allowBacklogSharing ? {$lte: new Date()} : {$gt: new Date()}})).map(capsule => ({
+      capsule: capsule._id,
+      owner: recipient,
+      sharedAt: Date.now()
+    }))
+
+    sharedCapsules.push(...requesterCapsules, ...recipientCapsules)
+
+    const updateData = {
+      status: decision,
+      acceptedAt: decision === 'accepted' ? Date.now() : null,
+      sharedCapsules: decision === 'accepted' ? sharedCapsules : []
+    }
+
+    const updatedPair = await PairedUsers.findByIdAndUpdate(pairId, updateData, {new: true, runValidators: true})
+
+    const capsuleIds = sharedCapsules.map(sc => sc.capsule)
+    const updatedCapsules = capsuleIds.length
+      ? await Capsule.updateMany(
+          {_id: {$in: capsuleIds}},
+          {
+            $set: {visibility: 'paired'},
+            $addToSet: {sharedWithPairs: {
+              pair: updatedPair._id,
+              sharedAt: Date.now()
+            }}
+          }
+        )
+      : {acknowledged: true, matchedCount: 0, modifiedCount: 0}
+
+    if (!updatedCapsules.acknowledged) {
+      return res.status(500).json({
+        success: false,
+        message: 'Capsule update was not acknowledged by the database.'
+      })
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `Pair request ${decision}`,
+      data: {
+        pair: updatedPair,
+        capsuleUpdate: {
+          matchedCount: updatedCapsules.matchedCount,
+          modifiedCount: updatedCapsules.modifiedCount
+        }
+      }
+    })
+
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Server error"
+    })
+  }
+}
+
+module.exports = {signUp, login, loggedInUser, logout, requestPair, confirmPair}

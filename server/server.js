@@ -1,19 +1,16 @@
+const path = require('path')
 const express = require('express')
 const app = express()
 const cookieParser = require('cookie-parser')
-require('dotenv').config()
+require('dotenv').config({ path: path.join(__dirname, '.env') })
 const cors = require('cors')
-const mogoose = require('mongoose')
-const { default: mongoose } = require('mongoose')
+const mongoose = require('mongoose')
 const userRoutes = require('./routes/userRoutes')
+const capsuleRoutes = require('./routes/capsuleRoutes')
 
 const COOKIE_SECRET = process.env.COOKIE_SECRET
+const ENVIRONMENT = process.env.NODE_ENV
 
-if(!COOKIE_SECRET) {
-  throw new error("required Env for cookies not set")
-}
-
-app.use(cookieParser(COOKIE_SECRET))
 const corsOptions = {
   origin: ['http://localhost:5317', 'https://your-frontend.com'], 
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
@@ -22,12 +19,19 @@ const corsOptions = {
 };
 const PORT = process.env.PORT || 3000
 
+if(!COOKIE_SECRET) {
+  throw new Error("required Env for cookies not set")
+}
+
+app.use(cookieParser(COOKIE_SECRET))
+
 app.disable('x-powered-by')
 app.use(cors(corsOptions))
 app.use(express.json())
 
 
 app.use('/v1', userRoutes)
+app.use('/v1', capsuleRoutes)
 
 
 app.get('/', async (req, res) => {

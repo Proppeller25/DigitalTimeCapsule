@@ -15,7 +15,9 @@ const pairedUsersSchema = new mongoose.Schema(
     pairKey: {
       type: String,
       required: true,
-      unique: true,
+      unique: function () {
+        return this.status === 'accepted'
+      },
     },
     status: {
       type: String,
