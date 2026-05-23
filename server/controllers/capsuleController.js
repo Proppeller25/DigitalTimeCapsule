@@ -29,16 +29,39 @@ const createCapsule = async (req, res) => {
     const [year, month, day] = arrivalDate.split('-');
     const localDate = new Date(year, month - 1, day);  // month is 0-indexed
 
+    const foundPairs = await PairedUsers.find({
+      $or: [
+        { requester: owner, status: 'accepted' },
+        { recipient: owner, status: 'accepted' }
+      ],
+      'shareSettings.autoShareFutureCapsules': true
+    })
+
+    const pairIds = foundPairs.map(pair => pair._id)
+    const hasAutoSharePairs = pairIds.length > 0
+
     const capsule = await Capsule.create({
       owner,
       name,
       fileUrl,
       arrivalDate: localDate,  // Store as Date, not string
-    });
+      visibility: hasAutoSharePairs ? 'paired' : 'private',
+      sharedWithPairs: pairIds.map(pairId => ({
+        pair: pairId,
+        sharedAt: Date.now()
+      }))
+    })
+
+    if (hasAutoSharePairs) {
+      await PairedUsers.updateMany(
+        { _id: { $in: pairIds } },
+        { $push: { sharedCapsules: { capsule: capsule._id, owner } } }
+      )
+    }
 
     return res.status(201).json({ success: true, data: capsule });
   } catch (error) {
-    console.error('Error creating event:', error);
+    console.error('Error creating capsule:', error);
     return res.status(500).json({ success: false, message: error?.message || 'Server error' });
   }
 };

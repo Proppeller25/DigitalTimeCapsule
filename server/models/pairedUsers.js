@@ -14,10 +14,7 @@ const pairedUsersSchema = new mongoose.Schema(
     },
     pairKey: {
       type: String,
-      required: true,
-      unique: function () {
-        return this.status === 'accepted'
-      },
+      required: true
     },
     status: {
       type: String,
@@ -55,6 +52,7 @@ const pairedUsersSchema = new mongoose.Schema(
         },
         deliveredAt: {
           type: Date,
+          default: Date.now
         },
       },
     ],
@@ -64,20 +62,24 @@ const pairedUsersSchema = new mongoose.Schema(
   }
 )
 
-pairedUsersSchema.pre('validate', function(next) {
-  if (!this.requester || !this.recipient) return next()
+// pairedUsersSchema.pre('save', function(next) {
+//   // Ensure both IDs exist
+//   if (!this.requester || !this.recipient) {
+//     return next() // Let the validation fail later for required fields
+//   }
 
-  if (this.requester.toString() === this.recipient.toString()) {
-    return next(new Error('Users cannot pair with themselves'))
-  }
+//   if (this.requester.toString() === this.recipient.toString()) {
+//     return next(new Error('Users cannot pair with themselves'))
+//   }
 
-  const sortedUserIds = [this.requester.toString(), this.recipient.toString()].sort()
-  this.pairKey = sortedUserIds.join(':')
-  next()
-})
+//   const sortedIds = [this.requester.toString(), this.recipient.toString()].sort()
+//   this.pairKey = sortedIds.join(':')
+//   next()
+// })
 
 pairedUsersSchema.index({ requester: 1, status: 1 })
 pairedUsersSchema.index({ recipient: 1, status: 1 })
 pairedUsersSchema.index({ 'sharedCapsules.capsule': 1 })
+pairedUsersSchema.index({ pairKey: 1 }, { unique: true , partialFilterExpression: { status: 'accepted' }})
 
 module.exports = mongoose.model('PairedUsers', pairedUsersSchema)

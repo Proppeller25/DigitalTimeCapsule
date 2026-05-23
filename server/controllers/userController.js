@@ -165,11 +165,13 @@ const requestPair = async (req, res) => {
       return res.status(404).json({success: false, message: "Recipient does not exist"})
     
     const shareSettings = { allowBacklogSharing }
+    const pairKey = [requester, recipient].sort().join('_')
 
     await PairedUsers.create({
       requester,
       recipient,
-      shareSettings
+      shareSettings,
+      pairKey
     })
 
     
@@ -208,6 +210,9 @@ const confirmPair = async (req, res) => {
     if(pair.recipient.toString() !== recipient) 
       return res.status(403).json({success: false, message: "Forbidden"})
 
+    if(pair.status === 'accepted') 
+      return res.status(409).json({success: false, message: "This pair request has already been accepted"})
+
     if (decision !== 'accepted') {
       try {
         pair.status = decision
@@ -225,19 +230,23 @@ const confirmPair = async (req, res) => {
 
     const sharedCapsules = []
 
-    const requester = pair.requester
+    const requester = pair.requester.toString()
 
-    const requesterCapsules = (await Capsule.find({owner: requester, arrivalDate:pair.shareSettings.allowBacklogSharing ? {$lte: new Date()} : {$gt: new Date()}})).map(capsule => ({
+    const requesterCapsules = (await Capsule.find({owner: requester, ...(pair.shareSettings.allowBacklogSharing ? {} : {arrivalDate: {$gt: new Date()}})})).map(capsule => ({
       capsule: capsule._id,
       owner: requester,
       sharedAt: Date.now()
     }))
 
-    const recipientCapsules = (await Capsule.find({owner: recipient, arrivalDate:pair.shareSettings.allowBacklogSharing ? {$lte: new Date()} : {$gt: new Date()}})).map(capsule => ({
+    console.log('Requester Capsules:', requesterCapsules, requester, pair.shareSettings.allowBacklogSharing ? 'all capsules' : 'future capsules only')
+
+    const recipientCapsules = (await Capsule.find({owner: recipient, ...(pair.shareSettings.allowBacklogSharing ? {} : {arrivalDate: {$gt: new Date()}})})).map(capsule => ({
       capsule: capsule._id,
       owner: recipient,
       sharedAt: Date.now()
     }))
+
+    console.log('Recipient Capsules:', recipientCapsules, recipient, pair.shareSettings.allowBacklogSharing ? {$lte: new Date()} : {$gt: new Date()})
 
     sharedCapsules.push(...requesterCapsules, ...recipientCapsules)
 

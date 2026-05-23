@@ -54,8 +54,8 @@ capsuleSchema.statics.uploadCapsuleFile = async function (file, options = {}) {
   }
 
   const uploadOptions = {
-    folder: 'timeCapsule/capsules',
-    allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'mp4', 'mp3'],
+    folder: 'eventure/events',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'mp4', 'mp3', 'pdf', 'docx', 'doc'],
     ...options,
   }
 
