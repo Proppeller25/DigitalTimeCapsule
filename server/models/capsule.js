@@ -53,23 +53,43 @@ capsuleSchema.statics.uploadCapsuleFile = async function (file, options = {}) {
     throw new Error('No image file provided')
   }
 
+  if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+    throw new Error('Cloudinary environment variables are not fully configured')
+  }
+
+  const mimeType = file.mimetype || ''
+  const isImage = mimeType.startsWith('image/')
+  const isVideo = mimeType.startsWith('video/')
+  const isLargeFile = file.size >= 8 * 1024 * 1024
+
   const uploadOptions = {
-    folder: 'eventure/events',
+    folder: 'timeCapsule/capsules',
+    resource_type: isImage ? 'image' : isVideo ? 'video' : 'raw',
     allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'mp4', 'mp3', 'pdf', 'docx', 'doc'],
+    timeout: 120000,
+    chunk_size: 6 * 1024 * 1024,
     ...options,
   }
 
   const result = await new Promise((resolve, reject) => {
-    const uploadStream = cloudinary.uploader.upload_stream(
-      uploadOptions,
-      (error, uploadResult) => {
-        if (error) reject(error)
-        else resolve(uploadResult)
-      }
-    )
+    const callback = (error, uploadResult) => {
+      if (error) return reject(error)
+      return resolve(uploadResult)
+    }
 
+    const uploadStream =
+      isLargeFile || !isImage
+        ? cloudinary.uploader.upload_large_stream(uploadOptions, callback)
+        : cloudinary.uploader.upload_stream(uploadOptions, callback)
+
+    uploadStream.on('error', reject)
+    uploadStream.on('finish', () => {})
     uploadStream.end(file.buffer)
   })
+
+  if (!result || !result.secure_url) {
+    throw new Error('Cloudinary upload did not return a secure URL')
+  }
 
   return {
     url: result.secure_url,
