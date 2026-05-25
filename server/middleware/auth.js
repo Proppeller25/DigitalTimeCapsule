@@ -22,7 +22,10 @@ const auth = async (req, res, next) => {
     if(!existingUser) 
       return res.status(401).json({success: false, message: "invalid auth credentials"})
 
+    const isActive = existingUser.accountStatus === 'active'
 
+    if(!isActive) 
+      return res.status(403).json({success: false, message: "account is not active"})
   
     req.user = {
       id: existingUser._id,

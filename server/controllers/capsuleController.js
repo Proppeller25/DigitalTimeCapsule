@@ -5,29 +5,29 @@ const User = require('../models/user')
 
 const createCapsule = async (req, res) => {
   try {
-    const { name, arrivalDate } = req.body;  // arrivalDate is string "YYYY-MM-DD"
-    const remoteFileUrl = req.body.fileUrl;
+    const { name, arrivalDate } = req.body  // arrivalDate is string "YYYY-MM-DD"
+    const remoteFileUrl = req.body.fileUrl
 
     if (!name || !arrivalDate || (!req.file && !remoteFileUrl)) {
-      return res.status(400).json({ success: false, message: 'missing required fields' });
+      return res.status(400).json({ success: false, message: 'missing required fields' })
     }
 
     if (!req.user) {
-      return res.status(401).json({ success: false, message: 'Authentication required' });
+      return res.status(401).json({ success: false, message: 'Authentication required' })
     }
 
-    const owner = req.user.id || req.user?._id || req.body.userId;
+    const owner = req.user.id || req.user?._id || req.body.userId
     if (!owner) {
-      return res.status(401).json({ success: false, message: 'no loggedIn user found' });
+      return res.status(401).json({ success: false, message: 'no loggedIn user found' })
     }
 
     const fileUrl = req.file
       ? (await Capsule.uploadCapsuleFile(req.file)).url
-      : remoteFileUrl;
+      : remoteFileUrl
 
     // ✅ Parse the local date string to a Date object (midnight in local time)
-    const [year, month, day] = arrivalDate.split('-');
-    const localDate = new Date(year, month - 1, day);  // month is 0-indexed
+    const [year, month, day] = arrivalDate.split('-')
+    const localDate = new Date(year, month - 1, day)  // month is 0-indexed
 
     const foundPairs = await PairedUsers.find({
       $or: [
@@ -59,11 +59,63 @@ const createCapsule = async (req, res) => {
       )
     }
 
-    return res.status(201).json({ success: true, data: capsule });
+    return res.status(201).json({ success: true, data: capsule })
   } catch (error) {
-    console.error('Error creating capsule:', error);
-    return res.status(500).json({ success: false, message: error?.message || 'Server error' });
+    console.error('Error creating capsule:', error)
+    return res.status(500).json({ success: false, message: error?.message || 'Server error' })
   }
-};
+}
 
-module.exports = {createCapsule}
+const getCapsules = async (req, res) => {
+  try {
+    if (!req.user)
+      return res.status(401).json({ success: false, message: 'Authentication required' })
+
+    const userId = req.user.id || req.user?._id || req.body.userId
+
+    if (!userId)
+      return res.status(401).json({ success: false, message: 'no loggedIn user found' })
+
+    const capsules = await Capsule.find({ owner: userId }).sort({ arrivalDate: 1 })
+    const sharedCapsules = await PairedUsers.find({
+      $or: [
+        { requester: userId, status: 'accepted' },
+        { recipient: userId, status: 'accepted' }
+      ]
+    }).populate('sharedCapsules.capsule')
+
+    return res.status(200).json({ success: true, data: { capsules, sharedCapsules } })
+  } catch (error) {
+    console.error('Error fetching capsules:', error)
+    return res.status(500).json({ success: false, message: error?.message || 'Server error' })
+  }
+}
+
+const deleteCapsule = async (req, res) => {
+  try {
+    if(!req.user) 
+      return res.status(401).json({ success: false, message: 'Authentication required' })
+
+    const userId = req.user.id || req.user?._id || req.body.userId
+    const capsuleId = req.params.id
+
+    const capsule = await Capsule.findById(capsuleId)
+    if (!capsule)
+      return res.status(404).json({ success: false, message: 'Capsule not found' })
+
+    if (capsule.owner.toString() !== userId)
+      return res.status(403).json({ success: false, message: 'Access denied' })
+
+    if(capsule.arrivalDate > new Date())
+      return res.status(400).json({ success: false, message: 'Cannot delete a capsule that has not arrived yet' })
+
+    await Capsule.findByIdAndDelete(capsuleId)
+    return res.status(200).json({ success: true, message: 'Capsule deleted successfully' })
+    
+  } catch (error) {
+    console.error('Error deleting capsule:', error)
+    return res.status(500).json({ success: false, message: error?.message || 'Server error' })
+  }
+}
+
+module.exports = {createCapsule, getCapsules, deleteCapsule}

@@ -15,7 +15,7 @@ const createToken = (user) => {
   )
 }
 
-const isProduction = () => process.env.NODE_ENV === 'production'
+const isProduction = () => process.env.NODE_ENV === 'production' || !process.env.NODE_ENV
 
 const signUp = async (req, res) => {
   try {
@@ -299,4 +299,71 @@ const confirmPair = async (req, res) => {
   }
 }
 
-module.exports = {signUp, login, loggedInUser, logout, requestPair, confirmPair}
+const updateAccount = async (req, res) => {
+  try {
+    const userId = req.user.id || req.user._id
+    const {username, email, password, lockCode} = req.body
+    
+    if(!username && !email && !password && !lockCode) {
+      return res.status(400).json({
+        success: false,
+        message: "At least one field (username, email, password, lockCode) must be provided for update"
+      })
+    }
+
+    // Find the user by ID
+    const user = await User.findById(userId)
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      })
+    }
+    // Update user fields
+    user.username = username || user.username
+    user.email = email || user.email
+    if(email && email !== user.email) user.verified = false
+    user.password = password || user.password
+    user.lockCode = lockCode || user.lockCode
+    
+    // Save the updated user
+    const updatedUser = await user.save()
+
+    return res.status(200).json({
+      success: true,
+      message: "Account updated successfully",
+      data: isProduction ? "" : updatedUser
+    })
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Server error"
+    })
+  }
+}
+
+const deleteAccount = async (req, res) => {
+  try {
+    const userId = req.user.id || req.user._id
+
+    const user = await User.findByIdAndDelete(userId)
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      })
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Account deleted successfully"
+    })
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Server error"
+    })
+  }
+}
+module.exports = {signUp, login, loggedInUser, logout, requestPair, confirmPair, updateAccount, deleteAccount}

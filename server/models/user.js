@@ -43,6 +43,11 @@ const UserSchema = new mongoose.Schema({
     type: String,
     unique: true,
     sparse: true
+  },
+  accountStatus: {
+    type: String,
+    enum: ['active', 'blocked'],
+    default: 'active'
   }
 },
 {
