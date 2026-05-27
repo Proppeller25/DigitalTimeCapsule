@@ -1,5 +1,19 @@
 import "./LandingPage.css"
-import { Link } from "react-router-dom"
+import Navbar from "../components/Navbar"
+import Footer from "../components/Footer"
+
+const navLinks = [
+  { label: "How it works", href: "#how-it-works" },
+  { label: "Features", href: "#features" },
+  { label: "Stories", href: "#stories" },
+]
+
+const footerLinks = [
+  { label: "Privacy", href: "/" },
+  { label: "Terms", href: "/" },
+  { label: "About", href: "/" },
+  { label: "Contact", href: "/" },
+]
 
 const featureList = [
   {
@@ -87,33 +101,11 @@ function StepIcon({ type }) {
   return <i className={iconMap[type] || "fa-solid fa-arrow-right"} aria-hidden="true" />
 }
 
-const LandingPage = () => {
+export default function LandingPage() {
   return (
     <main className="landingPage">
       <section className="heroSection">
-        <header className="navbar">
-          <div className="brand">
-           <Link to="/"><img src="/capsule.png" className="brandIcon" alt="Timecapsule" /></Link>
-          </div>
-
-          <div className="navActions">
-            <select name="languages" id="languages">
-              <option value="en">English</option>
-              <option value="es">Español</option>
-              <option value="fr">Français</option>
-            </select>
-
-            <nav className="navLinks">
-              <a href="#how-it-works">How it works</a>
-              <a href="#features">Features</a>
-              <a href="#stories">Stories</a>
-            </nav>
-          </div>
-
-          <a className="primaryButton" href="#early-access">
-            Get started
-          </a>
-        </header>
+        <Navbar links={navLinks} ctaHref="/auth" ctaLabel="Get Started" />
 
         <div className="heroContent">
           <div className="heroLeft">
@@ -123,11 +115,11 @@ const LandingPage = () => {
               <span> forever</span>
             </h1>
             <p className="heroText">
-              Lock away your thoughts, photos, and messages in a Timecapsule,
-              and unlock them in the future - for the moments that matter most.
+              Lock away your thoughts, photos, and messages in a Timecapsule, and unlock them in the
+              future - for the moments that matter most.
             </p>
-            <a className="primaryButton heroButton" href="#early-access">
-              Get early access
+            <a className="primaryButton heroButton" href="/auth">
+              Sign up
             </a>
           </div>
 
@@ -214,11 +206,11 @@ const LandingPage = () => {
         <div className="storyGrid">
           {storyList.map((story) => (
             <article className="storyCard" key={story.name}>
-              <p className="storyQuote">“{story.quote}”</p>
+              <p className="storyQuote">"{story.quote}"</p>
               <div className="storyAuthor">
                 <div className="storyAvatar">{story.initials}</div>
                 <p>
-                  {story.name} <span>• {story.city}</span>
+                  {story.name} <span>- {story.city}</span>
                 </p>
               </div>
             </article>
@@ -241,42 +233,27 @@ const LandingPage = () => {
         </div>
       </section>
 
-      <section className="ctaSection" id="early-access">
+      <section className="ctaSection" id="auth">
         <div className="ctaInner">
-          <p className="sectionLabel">GET EARLY ACCESS</p>
+          <p className="sectionLabel">LOG IN OR SIGN UP</p>
           <h2>
             Your next memory
-            <span> starts today</span>
+            <span> starts with an account</span>
           </h2>
           <p className="ctaText">
-            Join thousands already sealing their moments.
+            Log in to open your capsules or sign up to start preserving moments today.
             <br />
-            Free forever for personal use.
+            Your memories stay ready whenever you come back.
           </p>
 
-          <form className="ctaForm">
-            <input type="email" placeholder="you@email.com" />
-            <button type="submit">Get started</button>
-          </form>
+          <div className="ctaForm authActions">
+            <a className="secondaryButton" href="/auth">Log in</a>
+            <a className="primaryButton" href="/auth">Sign up</a>
+          </div>
         </div>
       </section>
 
-      <footer className="pageFooter">
-        <div className="brand">
-           <Link to="/"><img src="/capsule.png" className="brandIcon" alt="Timecapsule" /></Link>
-          </div>
-
-        <div className="footerLinks">
-          <a href="/">Privacy</a>
-          <a href="/">Terms</a>
-          <a href="/">About</a>
-          <a href="/">Contact</a>
-        </div>
-
-        <p className="footerText">© 2025 Timecapsule. All rights reserved.</p>
-      </footer>
+      <Footer links={footerLinks} copyright="(c) 2025 Timecapsule. All rights reserved." />
     </main>
   )
 }
-
-export default LandingPage
