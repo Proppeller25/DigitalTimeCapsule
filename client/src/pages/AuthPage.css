@@ -1,16 +1,22 @@
-/* From Uiverse.io by zanina-yassine */ 
-body {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  background-color: #f8f8f8;
+/* From Uiverse.io by zanina-yassine */
+.authPage {
+  min-height: 100vh;
+  width: 100%;
+  background:
+    radial-gradient(circle at top, rgba(47, 143, 210, 0.12), transparent 28%),
+    linear-gradient(180deg, #edf5fb 0%, #f8fbff 100%);
 }
+
+.authCardWrap {
+  min-height: calc(100vh - 88px);
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
 .form_container {
-  width: fit-content;
+  width: min(100%, 420px);
+  max-width: 420px;
   height: fit-content;
   display: flex;
   flex-direction: column;

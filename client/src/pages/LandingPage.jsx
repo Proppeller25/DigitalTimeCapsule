@@ -106,6 +106,7 @@ export default function LandingPage() {
     <main className="landingPage">
       <section className="heroSection">
         <Navbar links={navLinks} ctaHref="/auth" ctaLabel="Get Started" />
+
         <div className="heroContent">
           <div className="heroLeft">
             <p className="sectionLabel">THE FUTURE IS YOURS</p>
