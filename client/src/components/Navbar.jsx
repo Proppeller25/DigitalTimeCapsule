@@ -44,9 +44,9 @@ export default function Navbar({
           ))}
         </nav>
 
-        <a className="primaryButton navCtaButton" href={ctaHref} onClick={closeMenu}>
+        <Link className="primaryButton navCtaButton" to={ctaHref} onClick={closeMenu}>
           {ctaLabel}
-        </a>
+        </Link>
       </div>
 
       <button
