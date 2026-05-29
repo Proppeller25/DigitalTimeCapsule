@@ -9,7 +9,16 @@ const createToken = (user) => {
     throw new Error('JWT_SECRET not set')
   }
   return jwt.sign(
-    { user: { id: user._id, username: user.username, email: user.email, role: user.role} },
+    {
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        verified: user.verified ?? false,
+        accountStatus: user.accountStatus ?? 'active'
+      }
+    },
     process.env.JWT_SECRET,
     { expiresIn: '1h' }
   )

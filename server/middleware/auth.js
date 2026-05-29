@@ -1,7 +1,5 @@
 const jwt = require('jsonwebtoken')
 
-const User = require('../models/user')
-
 const auth = async (req, res, next) => {
   
   try {
@@ -11,27 +9,23 @@ const auth = async (req, res, next) => {
       return res.status(401).json({success: false, message: "No auth credentials"})
   
     const decodedUser = jwt.verify(token, process.env.JWT_SECRET)
-  
-    const userId = decodedUser.user.id || decodedUser.id || decodedUser.id
-  
+
+    const user = decodedUser.user || decodedUser
+    const userId = user.id || user._id
+
     if(!userId) 
       return res.status(401).json({success: false, message: "No auth(id) credentials"})
-  
-    const existingUser = await User.findById(userId)
-  
-    if(!existingUser) 
-      return res.status(401).json({success: false, message: "invalid auth credentials"})
 
-    const isActive = existingUser.accountStatus === 'active'
-
-    if(!isActive) 
+    if(user.accountStatus && user.accountStatus !== 'active')
       return res.status(403).json({success: false, message: "account is not active"})
-  
+
     req.user = {
-      id: existingUser._id,
-      username: existingUser.username,
-      email: existingUser.email,
-      verified: existingUser.verified
+      id: userId,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      verified: user.verified ?? false,
+      accountStatus: user.accountStatus ?? 'active'
     }
   
     next()
