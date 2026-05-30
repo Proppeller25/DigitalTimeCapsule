@@ -36,7 +36,6 @@ const AuthPage = () => {
 
             <ul className="featureList">
               <li>Keep stories, photos, and notes in one place</li>
-              <li>Switch between login and sign up without leaving the page</li>
               <li>Use a calm, focused interface that is easy to trust</li>
             </ul>
           </div>
@@ -108,7 +107,7 @@ const AuthPage = () => {
           )}
 
           <div className="input_container">
-            <label className="input_label" htmlFor="email_field">Email address</label>
+            <label className="input_label" htmlFor="email_field">Email address/Username</label>
             <div className="fieldShell">
               <svg
                 aria-hidden="true"
