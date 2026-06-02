@@ -6,6 +6,8 @@ import CapsuleLibraryView from '../components/dashboard/CapsuleLibraryView'
 import SharedCapsulesView from '../components/dashboard/SharedCapsulesView'
 import AccountView from '../components/dashboard/AccountView'
 
+import { useAuth } from '../context/AuthContext.jsx'
+
 
 
 
@@ -17,28 +19,7 @@ const navItems = [
   { key: 'account', label: 'Account', icon: 'account' },
 ]
 
-const viewTitles = {
-  dashboard: {
-    title: 'Capsule Dashboard',
-    subtitle: 'Welcome back, Jane',
-  },
-  create: {
-    title: 'Create Capsule',
-    subtitle: 'Write something now and unlock it later.',
-  },
-  capsules: {
-    title: 'My Capsules',
-    subtitle: 'Everything you have sealed in one place.',
-  },
-  shared: {
-    title: 'Shared Capsules',
-    subtitle: 'Capsules you created with friends or family.',
-  },
-  account: {
-    title: 'Account Settings',
-    subtitle: 'Manage your profile, access, and preferences.',
-  },
-}
+
 
 function SidebarIcon({ type }) {
   if (type === 'create') {
@@ -61,12 +42,38 @@ function SidebarIcon({ type }) {
 }
 
 function DashboardShell({ activeView, onChangeView, onAddNew }) {
+  const {user} = useAuth()
+  const viewTitles = {
+    dashboard: {
+      title: 'Capsule Dashboard',
+      subtitle: `Welcome back, ${user.username}!`,
+    },
+    create: {
+      title: 'Create Capsule',
+      subtitle: 'Write something now and unlock it later.',
+    },
+    capsules: {
+      title: 'My Capsules',
+      subtitle: 'Everything you have sealed in one place.',
+    },
+    shared: {
+      title: 'Shared Capsules',
+      subtitle: 'Capsules you created with friends or family.',
+    },
+    account: {
+      title: 'Account Settings',
+      subtitle: 'Manage your profile, access, and preferences.',
+    },
+  }
   const title = viewTitles[activeView] ?? viewTitles.dashboard
+
   const primaryButtonRef = useRef(null)
+
   useEffect(() => {
     if(activeView === 'create') primaryButtonRef.current.style.display = 'none'
     else primaryButtonRef.current.style.display = 'block' 
   }, [activeView])
+  
 
   return (
     <main className="dashboardMain">
@@ -99,8 +106,8 @@ function DashboardShell({ activeView, onChangeView, onAddNew }) {
             </div>
 
             <div className="profileCopy">
-              <strong>Jane Doe</strong>
-              <span>jane.doe@gmail.com</span>
+              <strong>{user.username}</strong>
+              <span>{user.email}</span>
             </div>
 
             <div className="profileActions">

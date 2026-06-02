@@ -1,6 +1,9 @@
 import './AuthPage.css'
 import { useState } from 'react'
 const localUrl = import.meta.env.VITE_LOCAL_SERVER_URL
+import {useAuth} from '../context/AuthContext.jsx'
+
+import {useNavigate} from 'react-router-dom'
 
 const AuthPage = () => {
   const [isSignUp, setIsSignUp] = useState(false)
@@ -9,6 +12,8 @@ const AuthPage = () => {
   const [username, setUsername] = useState(null)
   const [password, setPassword] = useState(null)
   const [confirmPassword, setConfirmPassword] = useState(null)
+  const {login} = useAuth()
+  const navigate = useNavigate()
 
 
   const handleLogin = async (e) => {
@@ -29,11 +34,14 @@ const AuthPage = () => {
         throw new Error(data?.message || 'Login failed')
       }
 
-      console.log(data)
+      await login()
+
+      navigate('/dashboard')
     } catch (error) {
       console.error(error.message)
     }
   }
+
 
   const handleSignUp = async (e) => {
     e.preventDefault()
