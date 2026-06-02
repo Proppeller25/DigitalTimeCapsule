@@ -12,7 +12,7 @@ const COOKIE_SECRET = process.env.COOKIE_SECRET
 const ENVIRONMENT = process.env.NODE_ENV
 
 const corsOptions = {
-  origin: ['http://localhost:5317', 'https://your-frontend.com'], 
+  origin: ['http://localhost:5173', 'https://your-frontend.com'], 
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Bearer'],
   credentials: true // Allow cookies and authorization headers

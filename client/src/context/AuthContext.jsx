@@ -1,0 +1,66 @@
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useState, useContext, useEffect } from 'react'
+const environment = import.meta.env.VITE_ENVIRONMENT || 'development'
+
+const API_URL = environment === 'development' ? import.meta.env.VITE_LOCAL_SERVER_URL : import.meta.env.VITE_PRODUCTION_SERVER_URL
+
+const AuthContext = createContext()
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch(`${API_URL}/v1/auth/me`, {
+          method: 'GET',
+          credentials: 'include',
+        })
+
+        const data = await response.json()
+
+        if (!response.ok) {
+          throw new Error(data.message || `HTTP error! status: ${response.status}`)
+
+        }
+
+        if (data.success) {
+          setUser(data.user)
+          setIsLoggedIn(true)
+        } else {
+          setIsLoggedIn(false)
+        }
+      } catch (error) {
+        console.error('Auth check error:', error.message)
+        setIsLoggedIn(false)
+      } finally {
+        setLoading(false)
+      }
+    }
+    checkAuth()
+  }, [])
+
+  const login = (userData) => {
+    if (!userData) {
+      setUser(null)
+      setIsLoggedIn(false)
+      return
+    }
+    setUser(userData)
+    setIsLoggedIn(true)
+  }
+
+  const logout = () => {
+    setUser(null)
+    setIsLoggedIn(false)
+  }
+
+  return (
+    <AuthContext.Provider value={{ user, isLoggedIn, loading, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  )
+}
+
+export const useAuth = () => useContext(AuthContext)

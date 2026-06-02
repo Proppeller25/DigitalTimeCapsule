@@ -1,10 +1,13 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import './Dashboard.css'
 import DashboardOverview from '../components/dashboard/DashboardOverview'
 import CreateCapsuleView from '../components/dashboard/CreateCapsuleView'
 import CapsuleLibraryView from '../components/dashboard/CapsuleLibraryView'
 import SharedCapsulesView from '../components/dashboard/SharedCapsulesView'
 import AccountView from '../components/dashboard/AccountView'
+
+
+
 
 const navItems = [
   { key: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
@@ -59,6 +62,11 @@ function SidebarIcon({ type }) {
 
 function DashboardShell({ activeView, onChangeView, onAddNew }) {
   const title = viewTitles[activeView] ?? viewTitles.dashboard
+  const primaryButtonRef = useRef(null)
+  useEffect(() => {
+    if(activeView === 'create') primaryButtonRef.current.style.display = 'none'
+    else primaryButtonRef.current.style.display = 'block' 
+  }, [activeView])
 
   return (
     <main className="dashboardMain">
@@ -121,7 +129,7 @@ function DashboardShell({ activeView, onChangeView, onAddNew }) {
                 <i className="fa-solid fa-bell" aria-hidden="true" />
                 <span className="notificationDot" />
               </button>
-              <button type="button" className="primaryAction" onClick={onAddNew}>
+              <button type="button" className="primaryAction" onClick={onAddNew} ref={primaryButtonRef}>
                 + Add New
               </button>
             </div>

@@ -31,11 +31,10 @@ const signUp = async (req, res) => {
     const {
       username,
       email,
-      password,
-      lockCode,
+      password
     } = req.body
 
-    if (!username || !email || !password || !lockCode) 
+    if (!username || !email || !password) 
       return res.status(400).json({success: false, message: "insufficient credentials"})
 
     const existingUser = await User.findOne({
@@ -48,8 +47,7 @@ const signUp = async (req, res) => {
     const details = {
       username,
       email,
-      password,
-      lockCode
+      password
     }
 
     const newUser = await new User(details)

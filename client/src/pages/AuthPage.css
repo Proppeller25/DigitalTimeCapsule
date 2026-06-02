@@ -55,7 +55,7 @@ body {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(105, 153, 241, 0.836), rgba(8, 15, 28, 0.68)),
+    linear-gradient(180deg, rgba(105, 115, 133, 0.836), rgba(8, 15, 28, 0.68)),
     linear-gradient(135deg, rgba(17, 93, 252, 0.16), rgba(14, 165, 233, 0.05));
 }
 
@@ -219,6 +219,7 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.16em;
   color: #115dfc;
+  font-family: 'Inter','Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
 }
 
 .authBrand h1 {
@@ -458,6 +459,7 @@ body {
     width: min(100%, 460px);
     min-height: auto;
     border-radius: 24px;
+    border-radius: 20px;
   }
 
   .authPage {
