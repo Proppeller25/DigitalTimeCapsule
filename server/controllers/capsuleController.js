@@ -4,7 +4,7 @@ const User = require('../models/user')
 
 
 const createCapsule = async (req, res) => {
-  try {
+  try { 
     const { name, arrivalDate } = req.body  // arrivalDate is string "YYYY-MM-DD"
     const remoteFileUrl = req.body.fileUrl
 
@@ -17,9 +17,18 @@ const createCapsule = async (req, res) => {
     }
 
     const owner = req.user.id || req.user?._id || req.body.userId
+
     if (!owner) {
       return res.status(401).json({ success: false, message: 'no loggedIn user found' })
     }
+
+    const user = req.user
+
+    if(!user.verified) 
+      return res.status(403).json({success: false, message: 'Account not verified'})
+
+    if(!user.hasLockCode) 
+      return res.status(403).json({success: false, message: 'Secret LockCode not set'})
 
     const fileUrl = req.file
       ? (await Capsule.uploadCapsuleFile(req.file)).url
@@ -27,6 +36,11 @@ const createCapsule = async (req, res) => {
 
     // ✅ Parse the local date string to a Date object (midnight in local time)
     const [year, month, day] = arrivalDate.split('-')
+    const currentYear = new Date().getFullYear()
+    const currentMonth = new Date().getMonth()
+    const currentDay = new Date().getDay()
+    if (Number(year) < currentYear || (Number(year) >= currentYear && month - 1 < currentMonth) || (Number(year) >= currentYear && month - 1 >= currentMonth && day <= currentDay))
+      return res.status(400).json({success: false, message: 'Cannot set a date in the past' })
     const localDate = new Date(year, month - 1, day)  // month is 0-indexed
 
     const foundPairs = await PairedUsers.find({

@@ -8,7 +8,9 @@ import AccountView from '../components/dashboard/AccountView'
 
 import { useAuth } from '../context/AuthContext.jsx'
 
+const environment = import.meta.env.VITE_ENVIRONMENT || 'development'
 
+const API_URL = environment === 'development' ? import.meta.env.VITE_LOCAL_SERVER_URL : import.meta.env.VITE_PRODUCTION_SERVER_URL
 
 
 const navItems = [
@@ -41,12 +43,34 @@ function SidebarIcon({ type }) {
   return <i className="fa-solid fa-house" aria-hidden="true" />
 }
 
+const handleLogout = async (e) => {
+  e.preventDefault()
+  try {
+    const res = await fetch(`${API_URL}/v1/auth/logout`,{
+      method: 'POST',
+      credentials: 'include'
+    })
+    const data = res.json()
+    
+    if(!res.ok) {
+      console.error(data.message)
+    }
+
+    location.reload()
+
+  } catch (error) {
+    console.error(error.message)
+  }
+}
+
+
+
 function DashboardShell({ activeView, onChangeView, onAddNew }) {
   const {user} = useAuth()
   const viewTitles = {
     dashboard: {
       title: 'Capsule Dashboard',
-      subtitle: `Welcome back, ${user.username}!`,
+      subtitle: `Welcome back, ${user?.username || 'Jane'}!`,
     },
     create: {
       title: 'Create Capsule',
@@ -106,15 +130,15 @@ function DashboardShell({ activeView, onChangeView, onAddNew }) {
             </div>
 
             <div className="profileCopy">
-              <strong>{user.username}</strong>
-              <span>{user.email}</span>
+              <strong>{user?.username || 'Jane Doe'}</strong>
+              <span>{user?.email || 'Jandoe@gmail.com'}</span>
             </div>
 
             <div className="profileActions">
               <button type="button" aria-label="Open settings" onClick={() => onChangeView('account')}>
                 <i className="fa-solid fa-gear" aria-hidden="true" />
               </button>
-              <button type="button" aria-label="Log out">
+              <button type="button" aria-label="Log out" onClick={handleLogout}>
                 <i className="fa-solid fa-arrow-right-from-bracket" aria-hidden="true" />
               </button>
             </div>

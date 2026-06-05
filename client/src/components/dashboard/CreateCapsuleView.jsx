@@ -1,3 +1,10 @@
+import { useAuth } from '../../context/AuthContext'
+import { useState } from 'react'
+
+const environment = import.meta.env.VITE_ENVIRONMENT || 'development'
+
+const API_URL = environment === 'development' ? import.meta.env.VITE_LOCAL_SERVER_URL : import.meta.env.VITE_PRODUCTION_SERVER_URL
+
 const privacyOptions = ['Private capsule', 'Shared with selected people', 'Public unlock']
 
 const attachments = [
@@ -7,7 +14,35 @@ const attachments = [
   'Video',
 ]
 
+
+
+
+
 export default function CreateCapsuleView() {
+  const [name, setName] = useState('')
+  const [file, setFile] = useState(null)
+  const [arrivalDate, setArrivalDate] = useState('')
+
+  const createCapsule = async (e) => {
+  e.preventDefault()
+  try {
+    const formData = new FormData()
+    formData.append('name', name)
+    formData.append('file', file)
+    formData.append('arrivalDate', arrivalDate)
+    const res = await fetch(`${API_URL}/v1/capsules`, {
+      method: 'POST',
+      credentials: 'include',
+      body: formData
+    })
+    const data = await res.json()
+    
+    if(!res.ok) 
+      console.error(data.message)
+  } catch (error) {
+    console.error(error.message)
+  }
+}
   return (
     <div className="dashboardView dashboardFormView">
       <section className="formGrid">
@@ -20,7 +55,7 @@ export default function CreateCapsuleView() {
           <form className="capsuleForm" onSubmit={(event) => event.preventDefault()}>
             <label>
               Capsule title
-              <input type="text" placeholder="Letters to future me" />
+              <input type="text" placeholder="Letters to future me" onChange={(e) => setName(e.target.value)}/>
             </label>
 
             <label>
@@ -31,7 +66,7 @@ export default function CreateCapsuleView() {
             <div className="formSplit">
               <label>
                 Unlock date
-                <input type="date" />
+                <input type="date" onChange={(e) => setArrivalDate(e.target.value)}/>
               </label>
               <label>
                 Unlock time
@@ -56,6 +91,7 @@ export default function CreateCapsuleView() {
                     {attachment}
                   </button>
                 ))}
+                <input type="file" name="capsuleFile" id="capsuleFile" onChange={(e) => setFile(e.target.files?.[0])} />
               </div>
             </fieldset>
 

@@ -1,3 +1,5 @@
+import { useAuth } from "../../context/AuthContext"
+
 const settings = [
   'Change password',
   'Update email address',
@@ -6,6 +8,7 @@ const settings = [
 ]
 
 export default function AccountView() {
+  const {user} = useAuth()
   return (
     <div className="dashboardView">
       <section className="accountPanel">
@@ -14,8 +17,8 @@ export default function AccountView() {
             <img src="/background.jpg" alt="Jane Doe" />
           </div>
           <div>
-            <h2>Jane Doe</h2>
-            <p>jane.doe@gmail.com</p>
+            <h2>{user?.username ||'Jane Doe'}</h2>
+            <p>{user?.email || 'janedoe@gmail.com'}</p>
             <span>Member since 2025</span>
           </div>
         </article>

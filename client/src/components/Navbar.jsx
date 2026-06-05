@@ -37,11 +37,18 @@ export default function Navbar({
         ) : null}
 
         <nav className="navLinks">
-          {links.map((link) => (
-            <a key={link.href} href={link.href} onClick={closeMenu}>
-              {link.label}
-            </a>
-          ))}
+          {links.map((link) => {
+            const isHash = typeof link.href === "string" && link.href.startsWith("#")
+            return isHash ? (
+              <a key={link.label} href={link.href} onClick={closeMenu}>
+                {link.label}
+              </a>
+            ) : (
+              <Link key={link.label} to={link.href} onClick={closeMenu}>
+                {link.label}
+              </Link>
+            )
+          })}
         </nav>
 
         <Link className="primaryButton navCtaButton" to={ctaHref} onClick={closeMenu}>

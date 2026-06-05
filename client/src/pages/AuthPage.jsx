@@ -1,7 +1,8 @@
 import './AuthPage.css'
 import { useState } from 'react'
-const localUrl = import.meta.env.VITE_LOCAL_SERVER_URL
 import {useAuth} from '../context/AuthContext.jsx'
+const environment = import.meta.env.VITE_ENVIRONMENT || 'development'
+const API_URL = environment === 'development' ? import.meta.env.VITE_LOCAL_SERVER_URL : import.meta.env.VITE_PRODUCTION_SERVER_URL
 
 import {useNavigate} from 'react-router-dom'
 
@@ -19,7 +20,7 @@ const AuthPage = () => {
   const handleLogin = async (e) => {
     e.preventDefault()
     try {
-      const res = await fetch(`${localUrl}/v1/auth/login`, {
+      const res = await fetch(`${API_URL}/v1/auth/login`, {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -49,7 +50,7 @@ const AuthPage = () => {
       alert('Passwords do not match')
     }
     try {
-      const res = await fetch(`${localUrl}/v1/auth/signup`,{
+      const res = await fetch(`${API_URL}/v1/auth/signup`,{
          method: 'POST',
         credentials: 'include',
         headers: {

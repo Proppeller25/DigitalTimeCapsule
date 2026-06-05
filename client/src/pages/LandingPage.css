@@ -14,9 +14,9 @@
   font-style: normal;
   font-variation-settings: "wdth" 100;
   position: relative;
-  box-sizing:content-box;
-  min-width:max-content;
-  position: relative;
+  box-sizing: border-box;
+  min-width: 0;
+  overflow-x: hidden;
 }
 
 .heroSection {
@@ -27,31 +27,6 @@
   border-radius: 18px;
   background: linear-gradient(180deg, #fcfeff 0%, #e9f4fb 100%);
   box-shadow: 0 35px 120px rgba(32, 91, 145, 0.12);
-}
-
-.heroSection::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: url('/background.jpg');
-  background-position: center right;
-  background-size: cover;
-  background-repeat: no-repeat;
-  filter: brightness(0.72) contrast(0.92) saturate(0.9);
-  transform: scale(1.02);
-  z-index: 0;
-}
-
-.heroSection::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(90deg, rgba(8, 18, 32, 0.88) 0%, rgba(8, 18, 32, 0.58) 40%, rgba(8, 18, 32, 0.18) 72%, rgba(8, 18, 32, 0.1) 100%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(7, 17, 30, 0.34) 100%);
-  z-index: 1;
-  padding: 0;
-  margin: 0;
 }
 
 .navbar,
@@ -267,11 +242,6 @@
   letter-spacing: -0.03em;
 }
 
-.heroTitle,
-.heroTitle span {
-  color: #ffffff;
-}
-
 .heroTitle span,
 .sectionHeading h2 span,
 .ctaInner h2 span {
@@ -279,6 +249,10 @@
   margin-top: 12px;
   font-style: italic;
   font-weight: 600;
+}
+
+.heroTitle span {
+  color: #1f7fb5;
 }
 
 .sectionHeading h2 span,
@@ -289,9 +263,9 @@
 .heroText {
   max-width: 520px;
   margin-top: 28px;
-  color: rgba(245, 249, 255, 0.82);
+  color: #4c5770;
   font-size: 1.1rem;
-  line-height: 1.85;
+  line-height: 1.8;
   font-weight: 500;
 }
 
@@ -300,9 +274,27 @@
 }
 
 .heroRight {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.heroImageCard {
+  width: min(100%, 440px);
+  height: 440px;
+  border-radius: 100%;
+  overflow: hidden;
+  background: linear-gradient(180deg, #f7fbff 0%, #eaf4fb 100%);
+  box-shadow: 0 32px 100px rgba(32, 91, 145, 0.12);
+  border: 1px solid rgba(115, 129, 170, 0.16);
+}
+
+.heroImageCard img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 34px;
 }
 
 .heroSteps {
@@ -428,6 +420,20 @@
 .featuresSection {
   padding: 72px 36px;
   background: linear-gradient(180deg, #06182c 0%, #0f263f 100%);
+  scroll-margin-top: 120px;
+}
+
+.howItWorksSection {
+  padding: 72px 36px;
+  scroll-margin-top: 120px;
+}
+
+.storiesSection {
+  scroll-margin-top: 120px;
+}
+
+.ctaSection {
+  scroll-margin-top: 120px;
 }
 
 .sectionHeading {
@@ -588,10 +594,44 @@
 .storyDots span {
   width: 9px;
   height: 9px;
+  border-radius: 50%;
+  background: rgba(31, 127, 181, 0.25);
 }
 
 .storyDots .active {
   background: #1f7fb5;
+}
+
+.howItWorksSection {
+  padding: 72px 36px;
+}
+
+.howItWorksGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+  max-width: 1040px;
+  margin: 0 auto;
+}
+
+.howItWorksCard {
+  padding: 32px 28px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 24px 55px rgba(15, 18, 34, 0.08);
+}
+
+.howItWorksCard h3 {
+  margin: 0 0 14px;
+  color: #151b32;
+  font-size: 1.1rem;
+}
+
+.howItWorksCard p {
+  margin: 0;
+  color: #4c5770;
+  font-size: 1rem;
+  line-height: 1.8;
 }
 
 .ctaSection {
@@ -663,11 +703,13 @@
 @media (max-width: 1100px) {
   .heroContent,
   .featureGrid,
+  .howItWorksGrid,
   .storyGrid {
     grid-template-columns: 1fr;
   }
 
   .featureGrid,
+  .howItWorksGrid,
   .storyGrid,
   .ctaInner,
   .sectionHeading {
@@ -678,6 +720,36 @@
   .sectionHeading h2,
   .ctaInner h2 {
     font-size: clamp(2.5rem, 6vw, 4rem);
+  }
+
+  .heroRight {
+    padding-top: 28px;
+  }
+}
+
+@media (max-width: 760px) {
+  .heroContent {
+    gap: 24px;
+  }
+
+  .heroImageCard {
+    width: 100%;
+  }
+
+  .heroTitle {
+    font-size: clamp(2.4rem, 8vw, 3.8rem);
+  }
+
+  .howItWorksGrid,
+  .featureGrid,
+  .storyGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .howItWorksCard,
+  .featureCard,
+  .storyCard {
+    min-height: auto;
   }
 }
 

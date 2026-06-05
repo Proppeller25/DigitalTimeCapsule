@@ -72,10 +72,19 @@ const storyList = [
   },
 ]
 
-const capsuleItems = [
-  { title: "Letters to future me", year: "2026", color: "blue" },
-  { title: "Memories with friends", year: "2027", color: "pink" },
-  { title: "Dreams & goals", year: "2028", color: "gray" },
+const howItWorksList = [
+  {
+    title: "Create your capsule",
+    description: "Write your message, add photos, and choose a secure future unlock date.",
+  },
+  {
+    title: "Seal it safely",
+    description: "Lock your memory behind encryption until the date you selected arrives.",
+  },
+  {
+    title: "Open when ready",
+    description: "Relive your story when the moment is right and share it with those you trust.",
+  },
 ]
 
 function Icon({ type }) {
@@ -89,16 +98,6 @@ function Icon({ type }) {
   }
 
   return <i className={iconMap[type] || "fa-solid fa-circle-info"} aria-hidden="true" />
-}
-
-function StepIcon({ type }) {
-  const iconMap = {
-    write: "fa-solid fa-pen",
-    seal: "fa-solid fa-vault",
-    open: "fa-solid fa-door-open",
-  }
-
-  return <i className={iconMap[type] || "fa-solid fa-arrow-right"} aria-hidden="true" />
 }
 
 export default function LandingPage() {
@@ -124,50 +123,28 @@ export default function LandingPage() {
           </div>
 
           <div className="heroRight">
-            <div className="heroSteps">
-              <div className="heroStep">
-                <div className="stepIcon">
-                  <StepIcon type="write" />
-                </div>
-                <div>
-                  <h3>Write</h3>
-                  <p>Capture your thoughts, photos, and files in a beautiful capsule.</p>
-                </div>
-              </div>
-
-              <div className="heroStep">
-                <div className="stepIcon">
-                  <StepIcon type="seal" />
-                </div>
-                <div>
-                  <h3>Seal</h3>
-                  <p>Choose when it should be unlocked - days, months, or years.</p>
-                </div>
-              </div>
-
-              <div className="heroStep">
-                <div className="stepIcon">
-                  <StepIcon type="open" />
-                </div>
-                <div>
-                  <h3>Open</h3>
-                  <p>Relive your memories at the perfect time in the future.</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="capsulePreview">
-              {capsuleItems.map((item) => (
-                <div className="capsuleRow" key={item.title}>
-                  <div className={`capsuleRowIcon ${item.color}`}>
-                    <div className="capsuleRowDot" />
-                  </div>
-                  <p>{item.title}</p>
-                  <span>{item.year}</span>
-                </div>
-              ))}
+            <div className="heroImageCard">
+              <img src="/background.jpg" alt="Product illustration" />
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="howItWorksSection" id="how-it-works">
+        <div className="sectionHeading">
+          <p className="sectionLabel">HOW IT WORKS</p>
+          <h2>
+            Simple steps to store <span>memories securely</span>
+          </h2>
+        </div>
+
+        <div className="howItWorksGrid">
+          {howItWorksList.map((item) => (
+            <article className="howItWorksCard" key={item.title}>
+              <h3>{item.title}</h3>
+              <p>{item.description}</p>
+            </article>
+          ))}
         </div>
       </section>
 

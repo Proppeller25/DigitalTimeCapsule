@@ -15,6 +15,7 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route path='/dashboard' element = {<Dashboard />}/>
         </Route>
+        <Route path='/NotFound' element = {<NotFound/>}/>
       </Routes>
     </BrowserRouter>
     
