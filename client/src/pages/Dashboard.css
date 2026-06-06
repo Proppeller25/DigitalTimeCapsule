@@ -250,6 +250,21 @@
   font-weight: 700;
 }
 
+.primaryAction:disabled,
+.secondaryAction:disabled,
+.iconButton:disabled,
+.textAction:disabled,
+.chipButton:disabled,
+.summaryPlus:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.primaryAction:disabled,
+.secondaryAction:disabled {
+  box-shadow: none;
+}
+
 .primaryAction {
   background: linear-gradient(135deg, #2f8fd2 0%, #1f7fb5 100%);
   color: #fff;

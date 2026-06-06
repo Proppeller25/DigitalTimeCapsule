@@ -1,4 +1,3 @@
-import { useAuth } from '../../context/AuthContext'
 import { useState } from 'react'
 
 const environment = import.meta.env.VITE_ENVIRONMENT || 'development'
@@ -22,27 +21,34 @@ export default function CreateCapsuleView() {
   const [name, setName] = useState('')
   const [file, setFile] = useState(null)
   const [arrivalDate, setArrivalDate] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const createCapsule = async (e) => {
-  e.preventDefault()
-  try {
-    const formData = new FormData()
-    formData.append('name', name)
-    formData.append('file', file)
-    formData.append('arrivalDate', arrivalDate)
-    const res = await fetch(`${API_URL}/v1/capsules`, {
-      method: 'POST',
-      credentials: 'include',
-      body: formData
-    })
-    const data = await res.json()
-    
-    if(!res.ok) 
-      console.error(data.message)
-  } catch (error) {
-    console.error(error.message)
+    e.preventDefault()
+    if (isSubmitting) return
+    setIsSubmitting(true)
+
+    try {
+      const formData = new FormData()
+      formData.append('name', name)
+      formData.append('file', file)
+      formData.append('arrivalDate', arrivalDate)
+      const res = await fetch(`${API_URL}/v1/capsules`, {
+        method: 'POST',
+        credentials: 'include',
+        body: formData
+      })
+      const data = await res.json()
+
+      if(!res.ok) {
+        console.error(data.message)
+      }
+    } catch (error) {
+      console.error(error.message)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
-}
   return (
     <div className="dashboardView dashboardFormView">
       <section className="formGrid">
@@ -52,7 +58,7 @@ export default function CreateCapsuleView() {
             <span className="helperBadge">Draft mode</span>
           </div>
 
-          <form className="capsuleForm" onSubmit={(event) => event.preventDefault()}>
+          <form className="capsuleForm" onSubmit={createCapsule}>
             <label>
               Capsule title
               <input type="text" placeholder="Letters to future me" onChange={(e) => setName(e.target.value)}/>
@@ -99,8 +105,8 @@ export default function CreateCapsuleView() {
               <button type="button" className="secondaryAction">
                 Save draft
               </button>
-              <button type="submit" className="primaryAction">
-                Seal capsule
+              <button type="submit" className="primaryAction" disabled={isSubmitting} aria-busy={isSubmitting}>
+                {isSubmitting ? 'Sealing capsule...' : 'Seal capsule'}
               </button>
             </div>
           </form>

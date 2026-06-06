@@ -389,6 +389,20 @@ body {
   box-shadow: 0 20px 36px rgba(17, 93, 252, 0.28);
 }
 
+.sign-in_btn:disabled,
+.sign-in_ggl:disabled,
+.ghostLink:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.sign-in_btn:disabled:hover,
+.sign-in_ggl:disabled:hover,
+.ghostLink:disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
 .sign-in_ggl {
   background: #ffffff;
   color: #132238;

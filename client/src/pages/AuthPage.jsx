@@ -13,6 +13,7 @@ const AuthPage = () => {
   const [username, setUsername] = useState(null)
   const [password, setPassword] = useState(null)
   const [confirmPassword, setConfirmPassword] = useState(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const {login} = useAuth()
   const navigate = useNavigate()
   const confirmRef = useRef(null);
@@ -48,6 +49,9 @@ const AuthPage = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault()
+    if (isSubmitting) return
+    setIsSubmitting(true)
+
     try {
       const res = await fetch(`${API_URL}/v1/auth/login`, {
         method: 'POST',
@@ -69,12 +73,15 @@ const AuthPage = () => {
       navigate('/dashboard')
     } catch (error) {
       console.error(error.message)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
 
   const handleSignUp = async (e) => {
     e.preventDefault()
+    if (isSubmitting) return
 
     if (password !== confirmPassword) {
       if (confirmRef.current) {
@@ -83,6 +90,8 @@ const AuthPage = () => {
       }
       return
     }
+
+    setIsSubmitting(true)
 
     try {
       const res = await fetch(`${API_URL}/v1/auth/signup`,{
@@ -98,6 +107,8 @@ const AuthPage = () => {
       console.log(data)
     } catch (error) {
       console.error(error.message)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -265,8 +276,8 @@ const AuthPage = () => {
             </div>
           )}
 
-          <button title={isSignUp ? 'Create Account' : 'Sign In'} type="submit" className="sign-in_btn">
-            <span>{isSignUp ? 'Create Account' : 'Sign In'}</span>
+          <button title={isSignUp ? 'Create Account' : 'Sign In'} type="submit" className="sign-in_btn" disabled={isSubmitting} aria-busy={isSubmitting}>
+            <span>{isSubmitting ? (isSignUp ? 'Creating account...' : 'Signing in...') : (isSignUp ? 'Create Account' : 'Sign In')}</span>
           </button>
 
           <div className="separator">

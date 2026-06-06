@@ -49,11 +49,15 @@ function SidebarIcon({ type }) {
 
 
 function DashboardShell({ activeView, onChangeView, onAddNew }) {
-  const {user, logout} = useAuth()
+  const {user} = useAuth()
   const navigate = useNavigate()
+  const [logoutLoading, setLogoutLoading] = useState(false)
 
   const handleLogout = async (e) => {
     e.preventDefault()
+    if (logoutLoading) return
+    setLogoutLoading(true)
+
     try {
       const res = await fetch(`${API_URL}/v1/auth/logout`,{
         method: 'POST',
@@ -63,6 +67,7 @@ function DashboardShell({ activeView, onChangeView, onAddNew }) {
       
       if(!res.ok) {
         console.error(data.message)
+        return
       }
 
       navigate('/auth')
@@ -70,6 +75,8 @@ function DashboardShell({ activeView, onChangeView, onAddNew }) {
 
     } catch (error) {
       console.error(error.message)
+    } finally {
+      setLogoutLoading(false)
     }
   }
   const viewTitles = {
@@ -143,8 +150,8 @@ function DashboardShell({ activeView, onChangeView, onAddNew }) {
               <button type="button" aria-label="Open settings" onClick={() => onChangeView('account')}>
                 <i className="fa-solid fa-gear" aria-hidden="true" />
               </button>
-              <button type="button" aria-label="Log out" onClick={handleLogout}>
-                <i className="fa-solid fa-arrow-right-from-bracket" aria-hidden="true" />
+              <button type="button" aria-label="Log out" onClick={handleLogout} disabled={logoutLoading} aria-busy={logoutLoading}>
+                {logoutLoading ? <i className="fa-solid fa-spinner fa-spin" aria-hidden="true" /> : <i className="fa-solid fa-arrow-right-from-bracket" aria-hidden="true" />}
               </button>
             </div>
           </div>
