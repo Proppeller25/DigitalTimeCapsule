@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import {useNavigate} from 'react-router-dom'
 import './Dashboard.css'
 import DashboardOverview from '../components/dashboard/DashboardOverview'
 import CreateCapsuleView from '../components/dashboard/CreateCapsuleView'
@@ -43,30 +44,34 @@ function SidebarIcon({ type }) {
   return <i className="fa-solid fa-house" aria-hidden="true" />
 }
 
-const handleLogout = async (e) => {
-  e.preventDefault()
-  try {
-    const res = await fetch(`${API_URL}/v1/auth/logout`,{
-      method: 'POST',
-      credentials: 'include'
-    })
-    const data = res.json()
-    
-    if(!res.ok) {
-      console.error(data.message)
-    }
 
-    location.reload()
-
-  } catch (error) {
-    console.error(error.message)
-  }
-}
 
 
 
 function DashboardShell({ activeView, onChangeView, onAddNew }) {
-  const {user} = useAuth()
+  const {user, logout} = useAuth()
+  const navigate = useNavigate()
+
+  const handleLogout = async (e) => {
+    e.preventDefault()
+    try {
+      const res = await fetch(`${API_URL}/v1/auth/logout`,{
+        method: 'POST',
+        credentials: 'include'
+      })
+      const data = await res.json()
+      
+      if(!res.ok) {
+        console.error(data.message)
+      }
+
+      navigate('/auth')
+      // logout()
+
+    } catch (error) {
+      console.error(error.message)
+    }
+  }
   const viewTitles = {
     dashboard: {
       title: 'Capsule Dashboard',
