@@ -26,7 +26,7 @@ const auth = async (req, res, next) => {
       role: user.role,
       verified: user.verified ?? false,
       accountStatus: user.accountStatus ?? 'active',
-      hasLockCode: user.lockCode.length > 0
+      hasLockCode: user.hasLockCode
     }
   
     next()

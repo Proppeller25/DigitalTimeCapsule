@@ -16,7 +16,8 @@ const createToken = (user) => {
         email: user.email,
         role: user.role,
         verified: user.verified ?? false,
-        accountStatus: user.accountStatus ?? 'active'
+        accountStatus: user.accountStatus ?? 'active',
+        hasLockCode: user.lockCode.length > 0
       }
     },
     process.env.JWT_SECRET,
