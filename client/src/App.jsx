@@ -13,8 +13,8 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path='/auth' element = {<AuthPage />}/>
         <Route element={<ProtectedRoute />}>
-          <Route path='/dashboard' element = {<Dashboard />}/>
         </Route>
+          <Route path='/dashboard' element = {<Dashboard />}/>
         <Route path='/NotFound' element = {<NotFound/>}/>
       </Routes>
     </BrowserRouter>

@@ -1,3 +1,9 @@
+import { useState, useEffect } from "react"
+
+const environment = import.meta.env.VITE_ENVIRONMENT || 'development'
+
+const API_URL = environment === 'development' ? import.meta.env.VITE_LOCAL_SERVER_URL : import.meta.env.VITE_PRODUCTION_SERVER_URL
+
 const statusCards = [
   {
     label: 'Capsules stored',
@@ -56,22 +62,73 @@ function MiniBars({ bars }) {
   )
 }
 
+
+
 export default function DashboardOverview({ onCreateCapsule }) {
+  const [capsulesLoading, setCapsulesLoading] = useState(false)
+  const [userCapsules, setUserCapsules] = useState([])
+  const [sharedCapsules, setSharedCapsules] = useState([])
+
+  useEffect(() => {
+    const getCapsules = async () => {
+      setCapsulesLoading(true)
+      try {
+        const res = await fetch(`${API_URL}/v1/capsules`, {
+          method: 'GET',
+          credentials: 'include'
+        })
+        const data = await res.json()
+
+        if (!data.success || !res.ok) return console.error(data.message)
+        setUserCapsules(data?.data?.capsules || [])
+        setSharedCapsules(data?.data?.sharedCapsules || [])
+      } catch (error) {
+        console.error(error.message)
+      } finally {
+        setCapsulesLoading(false)
+      }
+    }
+
+    getCapsules()
+  }, [])
+
+  
   return (
     <div className="dashboardView dashboardOverview">
       <section className="summaryGrid">
-        {statusCards.map((card) => (
-          <article key={card.label} className={`summaryCard ${card.accent}`}>
-            <p>{card.label}</p>
+        
+          <article className={`summaryCard amber`}>
+            <p>Capsules Stored</p>
             <div className="summaryRow">
-              <strong>{card.value}</strong>
-              <span className="summaryPill">{card.trend}</span>
+              <strong>{userCapsules.length}</strong>
+              <span className="summaryPill"></span>
             </div>
 
-            {card.bars.length ? <MiniBars bars={card.bars} /> : <button type="button" className="summaryPlus">+</button>}
-            <small>{card.note}</small>
+            {/* {<MiniBars bars={card.bars} />}
+            <small>{card.note}</small> */}
           </article>
-        ))}
+
+          <article className={`summaryCard rose`}>
+            <p>Waiting to unlock</p>
+            <div className="summaryRow">
+              <strong>{userCapsules.length}</strong>
+              <span className="summaryPill"></span>
+            </div>
+
+            {/* {<MiniBars bars={card.bars} />}
+            <small>{card.note}</small> */}
+          </article>
+
+          <article className={`summaryCard mint`}>
+            <p>Next unlock</p>
+            <div className="summaryRow">
+              <strong>{userCapsules.length}</strong>
+              <span className="summaryPill"></span>
+            </div>
+
+            {/* {<MiniBars bars={card.bars} />}
+            <small>{card.note}</small> */}
+          </article>
       </section>
 
       <section className="timelineSection">
