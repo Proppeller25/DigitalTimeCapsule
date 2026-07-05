@@ -44,6 +44,24 @@ function SidebarIcon({ type }) {
   return <i className="fa-solid fa-house" aria-hidden="true" />
 }
 
+function MobileNav({ activeView, onChangeView }) {
+  return (
+    <nav className="dashboardBottomNav" aria-label="Dashboard navigation">
+      {navItems.map((item) => (
+        <button
+          key={item.key}
+          type="button"
+          className={`dashboardBottomNavButton ${activeView === item.key ? 'active' : ''}`}
+          onClick={() => onChangeView(item.key)}
+          aria-label={item.label}
+        >
+          <SidebarIcon type={item.icon} />
+        </button>
+      ))}
+    </nav>
+  )
+}
+
 
 
 
@@ -52,6 +70,7 @@ function DashboardShell({ activeView, onChangeView, onAddNew }) {
   const {user} = useAuth()
   const navigate = useNavigate()
   const [logoutLoading, setLogoutLoading] = useState(false)
+  const [userCapsules, setUserCapsules] = useState([])
 
   const handleLogout = async (e) => {
     e.preventDefault()
@@ -109,6 +128,25 @@ function DashboardShell({ activeView, onChangeView, onAddNew }) {
     if(activeView === 'create') primaryButtonRef.current.style.display = 'none'
     else primaryButtonRef.current.style.display = 'block' 
   }, [activeView])
+
+  useEffect(() => {
+    const getCapsules = async () => {
+      try {
+        const res = await fetch(`${API_URL}/v1/capsules`, {
+          method: 'GET',
+          credentials: 'include'
+        })
+        const data = await res.json()
+
+        if (!data.success || !res.ok) return console.error(data.message)
+        setUserCapsules(data?.data?.capsules || [])
+      } catch (error) {
+        console.error(error.message)
+      }
+    }
+
+    getCapsules()
+  }, [])
   
 
   return (
@@ -179,7 +217,10 @@ function DashboardShell({ activeView, onChangeView, onAddNew }) {
           </header>
 
           {activeView === 'dashboard' ? (
-            <DashboardOverview onCreateCapsule={onAddNew} />
+            <DashboardOverview
+              onCreateCapsule={onAddNew}
+              userCapsules={userCapsules}
+            />
           ) : null}
           {activeView === 'create' ? <CreateCapsuleView /> : null}
           {activeView === 'capsules' ? <CapsuleLibraryView /> : null}
@@ -187,6 +228,7 @@ function DashboardShell({ activeView, onChangeView, onAddNew }) {
           {activeView === 'account' ? <AccountView /> : null}
         </section>
       </section>
+      <MobileNav activeView={activeView} onChangeView={onChangeView} />
     </main>
   )
 }
