@@ -22,6 +22,7 @@ export default function CreateCapsuleView() {
   const [file, setFile] = useState(null)
   const [arrivalDate, setArrivalDate] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const fileUrl = file ? URL.createObjectURL(file) : null
 
   const createCapsule = async (e) => {
     e.preventDefault()
@@ -114,7 +115,7 @@ export default function CreateCapsuleView() {
 
         <aside className="previewPanel">
           <div className="previewIllustration">
-            <img src="/capsule.png" alt="" />
+            <img src={fileUrl || "/capsule.png"} alt="Capsule preview"/>
           </div>
           <h3>Preview</h3>
           <p>See how your capsule will look before you lock it away.</p>
