@@ -8,6 +8,7 @@ import SharedCapsulesView from '../components/dashboard/SharedCapsulesView'
 import AccountView from '../components/dashboard/AccountView'
 
 import { useAuth } from '../context/AuthContext.jsx'
+import { useToast } from '../context/ToastContext.jsx'
 
 const environment = import.meta.env.VITE_ENVIRONMENT || 'development'
 
@@ -68,6 +69,7 @@ function MobileNav({ activeView, onChangeView }) {
 
 function DashboardShell({ activeView, onChangeView, onAddNew }) {
   const {user} = useAuth()
+  const { showToast } = useToast()
   const navigate = useNavigate()
   const [logoutLoading, setLogoutLoading] = useState(false)
   const [userCapsules, setUserCapsules] = useState([])
@@ -85,15 +87,28 @@ function DashboardShell({ activeView, onChangeView, onAddNew }) {
       const data = await res.json()
       
       if(!res.ok) {
-        console.error(data.message)
+        showToast({
+          type: 'error',
+          title: 'Logout failed',
+          message: data.message || 'We could not log you out right now.',
+        })
         return
       }
 
+      showToast({
+        type: 'success',
+        title: 'Logged out',
+        message: 'You have been signed out safely.',
+      })
       navigate('/auth')
       // logout()
 
     } catch (error) {
-      console.error(error.message)
+      showToast({
+        type: 'error',
+        title: 'Network error',
+        message: error.message || 'Please check your connection and try again.',
+      })
     } finally {
       setLogoutLoading(false)
     }
@@ -138,15 +153,26 @@ function DashboardShell({ activeView, onChangeView, onAddNew }) {
         })
         const data = await res.json()
 
-        if (!data.success || !res.ok) return console.error(data.message)
+        if (!data.success || !res.ok) {
+          showToast({
+            type: 'error',
+            title: 'Capsules not loaded',
+            message: data.message || 'We could not load your capsules.',
+          })
+          return
+        }
         setUserCapsules(data?.data?.capsules || [])
       } catch (error) {
-        console.error(error.message)
+        showToast({
+          type: 'error',
+          title: 'Capsule error',
+          message: error.message || 'Something went wrong while loading capsules.',
+        })
       }
     }
 
     getCapsules()
-  }, [])
+  }, [showToast])
   
 
   return (

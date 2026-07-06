@@ -1,0 +1,106 @@
+.toastViewport {
+  position: fixed;
+  top: 1.25rem;
+  right: 1.25rem;
+  z-index: 9999;
+  display: grid;
+  gap: 0.75rem;
+  width: min(92vw, 380px);
+  pointer-events: none;
+}
+
+.toastCard {
+  display: grid;
+  grid-template-columns: 40px 1fr auto;
+  align-items: start;
+  gap: 0.85rem;
+  padding: 0.95rem 1rem;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 18px 45px rgba(20, 27, 52, 0.16);
+  pointer-events: auto;
+  backdrop-filter: blur(14px);
+  animation: toastIn 0.22s ease-out;
+}
+
+.toastCard--success {
+  border-left: 5px solid #1f9d62;
+}
+
+.toastCard--error {
+  border-left: 5px solid #d64545;
+}
+
+.toastCard--warning {
+  border-left: 5px solid #d18b16;
+}
+
+.toastCard--info {
+  border-left: 5px solid #3f6fd1;
+}
+
+.toastIcon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  color: #1e2240;
+  background: rgba(30, 34, 64, 0.08);
+}
+
+.toastCopy strong {
+  display: block;
+  margin-bottom: 0.2rem;
+  color: #1e2240;
+}
+
+.toastCopy p {
+  margin: 0;
+  color: rgba(30, 34, 64, 0.8);
+  line-height: 1.45;
+}
+
+.toastCloseButton {
+  border: 0;
+  background: transparent;
+  color: rgba(30, 34, 64, 0.65);
+  cursor: pointer;
+  padding: 0.1rem;
+}
+
+.toastCloseButton:hover {
+  color: #1e2240;
+}
+
+.toastCloseButton:focus-visible {
+  outline: 2px solid #1e2240;
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 640px) {
+  .toastViewport {
+    top: 0.75rem;
+    right: 0.75rem;
+    left: 0.75rem;
+    width: auto;
+  }
+
+  .toastCard {
+    grid-template-columns: 36px 1fr auto;
+    border-radius: 16px;
+  }
+}

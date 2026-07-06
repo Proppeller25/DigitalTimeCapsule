@@ -1,10 +1,11 @@
 import './AuthPage.css'
 import { useState, useRef, useEffect } from 'react'
 import {useAuth} from '../context/AuthContext.jsx'
+import { useToast } from '../context/ToastContext.jsx'
+import {useNavigate} from 'react-router-dom'
+
 const environment = import.meta.env.VITE_ENVIRONMENT || 'development'
 const API_URL = environment === 'development' ? import.meta.env.VITE_LOCAL_SERVER_URL : import.meta.env.VITE_PRODUCTION_SERVER_URL
-
-import {useNavigate} from 'react-router-dom'
 
 const AuthPage = () => {
   const [isSignUp, setIsSignUp] = useState(false)
@@ -15,6 +16,7 @@ const AuthPage = () => {
   const [confirmPassword, setConfirmPassword] = useState(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const {login} = useAuth()
+  const { showToast } = useToast()
   const navigate = useNavigate()
   const confirmRef = useRef(null);
 
@@ -70,9 +72,18 @@ const AuthPage = () => {
 
       await login()
 
+      showToast({
+        type: 'success',
+        title: 'Welcome back',
+        message: 'You are now signed in.',
+      })
       navigate('/dashboard')
     } catch (error) {
-      console.error(error.message)
+      showToast({
+        type: 'error',
+        title: 'Login failed',
+        message: error.message || 'Please check your details and try again.',
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -104,9 +115,23 @@ const AuthPage = () => {
       })
 
       const data = await res.json()
-      console.log(data)
+
+      if (!res.ok) {
+        throw new Error(data?.message || 'Sign up failed')
+      }
+
+      showToast({
+        type: 'success',
+        title: 'Account created',
+        message: data?.message || 'Your account is ready. You can sign in now.',
+      })
+      setIsSignUp(false)
     } catch (error) {
-      console.error(error.message)
+      showToast({
+        type: 'error',
+        title: 'Sign up failed',
+        message: error.message || 'Please review the form and try again.',
+      })
     } finally {
       setIsSubmitting(false)
     }

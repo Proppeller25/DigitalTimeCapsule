@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useToast } from '../../context/ToastContext.jsx'
 
 const environment = import.meta.env.VITE_ENVIRONMENT || 'development'
 
@@ -22,6 +23,7 @@ export default function CreateCapsuleView() {
   const [file, setFile] = useState(null)
   const [arrivalDate, setArrivalDate] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const { showToast } = useToast()
   const fileUrl = file ? URL.createObjectURL(file) : null
 
   const createCapsule = async (e) => {
@@ -42,10 +44,25 @@ export default function CreateCapsuleView() {
       const data = await res.json()
 
       if(!res.ok) {
-        console.error(data.message)
+        showToast({
+          type: 'error',
+          title: 'Capsule not saved',
+          message: data.message || 'Please try again in a moment.',
+        })
+        return
       }
+
+      showToast({
+        type: 'success',
+        title: 'Capsule created',
+        message: data.message || 'Your new capsule is ready.',
+      })
     } catch (error) {
-      console.error(error.message)
+      showToast({
+        type: 'error',
+        title: 'Create capsule failed',
+        message: error.message || 'We could not save your capsule.',
+      })
     } finally {
       setIsSubmitting(false)
     }
